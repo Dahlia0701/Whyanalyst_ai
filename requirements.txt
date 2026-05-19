@@ -1,0 +1,19 @@
+# Core Data Kernel
+pandas>=2.2.0
+numpy>=1.26.0
+
+# Natural Language Processing (NLP) Domain
+# (Starting with lightweight tools, leaving room to upgrade to spaCy later)
+regex>=2024.1.0
+
+# Advanced Intel & Core ML Domain
+scikit-learn>=1.4.0
+xgboost>=2.0.0
+
+# Traditional BI & Visualization Domain
+matplotlib>=3.8.0
+plotly>=5.19.0
+
+# Interface 
+
+streamlit>=1.31.0

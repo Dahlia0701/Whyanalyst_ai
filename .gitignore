@@ -1,0 +1,20 @@
+# 1. Ignore all virtual environment folders
+venv/
+.venv/
+env/
+
+# 2. Ignore heavy data files, BUT keep your mock testing data visible
+data/*.csv
+data/*.xlsx
+!data/mock_business_data.csv
+
+# 3. Ignore temporary Python cache files
+__pycache__/
+*.pyc
+
+# 4. Ignore local Streamlit configuration files
+.streamlit/
+
+# 5. Ignore system clutter (Mac/Windows hidden files)
+.DS_Store
+Thumbs.db
