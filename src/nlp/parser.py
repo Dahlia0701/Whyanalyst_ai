@@ -14,10 +14,20 @@ class Queryparser:
     def parser(self,query):
         query=query.lower()
         found_columns=[]
-        found_row=[]
+        found_action=[]
 
         for col in self.metadata['columns'].keys():
             pattern=rf"\b{col.lower()}[a-zA-Z]*[!?]*\b"
 
             if re.search(pattern,query):
                 found_columns.append('col')
+
+        for action,words in self.synonym.items():
+            pattern=r"\b("+"|".join(words)+r")\b"
+            if re.search(pattern,query):
+                found_action.append(action)
+        return{
+            "columns": found_columns,
+            "action": found_action,
+            "original_query": query
+        }
