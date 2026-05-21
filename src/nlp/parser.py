@@ -8,7 +8,9 @@ class Queryparser:
             "sum": ["total", "sum", "combined", "add up"],
             "max": ["highest", "max", "top", "maximum"],
             "min": ["lowest", "min", "bottom", "minimum"],
-            "plot": ["chart", "graph", "plot", "visualize", "show"]
+            "plot": ["chart", "graph", "plot", "visualize", "show"],
+            "why": ["why", "reason", "cause", "influence", "factor", "dropped", "increased"],
+            "predict": ["predict", "forecast", "future", "what if", "expect"]
         }
 
     def parser(self,query):
