@@ -17,7 +17,7 @@ class Queryparser:
         found_action=[]
 
         for col in self.metadata['columns'].keys():
-            pattern=rf"\b{col.lower()}[a-zA-Z]*[!?]*\b"
+            pattern=rf"\b{col.lower()}[a-zA-Z]*[!?.$@]*\b"
 
             if re.search(pattern,query):
                 found_columns.append('col')
