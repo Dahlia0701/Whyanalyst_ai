@@ -18,7 +18,7 @@ def describe_data(df:pd.DataFrame):
                         'max':float(df[col].max()) if missing_val<len(df) else None
                         }
         
-        elif unique_count<(len(df)*0.05) or unique_count<=10: #low cardinality for big dataset and small_set_category for small dataset
+        elif unique_count<(len(df)*0.05) or unique_count<=5: #low cardinality for big dataset and small_set_category for small dataset
             col_type='categorical'
             extra_info={ 'options': str(val) for val in unique_val[:10] } #options have top 10 unique values from the list of unique values 
 

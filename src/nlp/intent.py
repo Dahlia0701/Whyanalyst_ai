@@ -3,7 +3,7 @@ class Intentrouter:
         self.metadata=metadata
     
     def intention(self,parsed_query):
-        columns=parsed_query['column']
+        columns=parsed_query['columns']
         actions=parsed_query['actions']
         plan=[]
 

@@ -22,7 +22,7 @@ class Queryparser:
             pattern=rf"\b{col.lower()}[a-zA-Z]*[!?.$@]*\b"
 
             if re.search(pattern,query):
-                found_columns.append('col')
+                found_columns.append(col)
 
         for action,words in self.synonym.items():
             pattern=r"\b("+"|".join(words)+r")\b"
@@ -30,6 +30,6 @@ class Queryparser:
                 found_action.append(action)
         return{
             "columns": found_columns,
-            "action": found_action,
+            "actions": found_action,
             "original_query": query
         }
