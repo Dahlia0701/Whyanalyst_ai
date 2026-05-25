@@ -66,4 +66,7 @@ if 'visualization' in plan and isinstance(result, pd.DataFrame):
     fig = plotter.create_chart(result, target, group, action)
     if fig:
         print("Step D: Chart generated successfully! Opening in browser...")
+        #Sometimes Plotly tries to open in a way that your specific browser setup (or firewall) doesn't like. You can force it to use a simpler method.
+        import plotly.io as pio    
+        pio.renderers.default = 'browser'
         fig.show()
