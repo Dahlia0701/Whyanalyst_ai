@@ -10,6 +10,8 @@ class MLPipeline:
         self.metadata=metadata
 
     def prepare_data(self,df,target_col):
+        #This ensures that Product Type becomes Product_Type. If you don't do this, XGBoost might raise a ValueError during the .fit() stage.
+        df.columns=[c.replace(' ','_').replace('(','').replace(')','') for c in df.columns] 
         y=df[target_col]
         X=df.drop([target_col],axis=1)
 
