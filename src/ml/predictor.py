@@ -34,4 +34,4 @@ class Predictor:
         return self.my_model.predict(Xnew)
     
     def get_features(self):
-        return self.feature_names
+        return self.feature_names,self.my_model
