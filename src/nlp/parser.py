@@ -17,6 +17,7 @@ class Queryparser:
         query=query.lower()
         found_columns=[]
         found_action=[]
+        found_values=[]
 
         for col in self.metadata['columns'].keys():
             pattern=rf"\b{col.lower()}[a-zA-Z]*[!?.$@]*\b"
@@ -28,8 +29,20 @@ class Queryparser:
             pattern=r"\b("+"|".join(words)+r")\b"
             if re.search(pattern,query):
                 found_action.append(action)
+
+
+        for col,info in self.metadata['columns'].items(): #for xai
+            if info['column_type']=='categorical' and 'unique_values' in info:
+                for val in info['unique_values']:
+                    val_pattern = rf"\b{re.escape(str(val).lower())}\b"
+                    if re.search(val_pattern, query):
+                        found_values[col] = val
+                        if col not in found_columns:
+                            found_columns.append(col)
+                    
         return{
             "columns": found_columns,
             "actions": found_action,
+            "values": found_values,
             "original_query": query
         }

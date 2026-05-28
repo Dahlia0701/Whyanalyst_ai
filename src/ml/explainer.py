@@ -45,7 +45,7 @@ class Explainer:
             'impact':avg_imp
         })
         if direction=="negative":
-            df_dir = cast(pd.DataFrame,df_dir[df_dir['impact'] < 0].copy())
+            df_dir = cast(pd.DataFrame,df_dir[df_dir['impact'] < 0].copy()) #cast is used to tell pylance that variable is a dataframe
             df_dir=df_dir.copy()
             if df_dir.empty:
                 print("⚠️ No negative impacts found in this dataset.")
@@ -53,11 +53,35 @@ class Explainer:
             else:
                 df_dir=df_dir.sort_values(by="impact",ascending=True)
                 title="<b>red_flags</b> Top negative Influences"
-                color="Reds_r"
-        
-
-            
+                color="Reds_r" #reversed red dark to light
         else:
+            df_dir = cast(pd.DataFrame,df_dir[df_dir['impact'] > 0].copy()) #cast is used to tell pylance that variable is a dataframe
+            df_dir=df_dir.copy()
+            if df_dir.empty:
+                print("⚠️ No positive impacts found in this dataset.")
+                return None
+            else:
+                df_dir=df_dir.sort_values(by="impact",ascending=False)
+                title="<b>Success factors</b> Top positive Influences"
+                color="Greens" #light to green 
+        fig=px.bar(df_dir.heads(10),x='impact',y='feature',orientation='h',title=title,template='plotly_white',
+                   color='impact',color_continuous_scale=color)
+        return fig
+    
+    def explain_local(self,single_row_df):
+        shap_values,_=self.get_shap_values(single_row_df)
+        fig=go.Figure(go.Waterfall(
+            orientation='h',
+            x=shap_values[0],
+            y=self.features,
+            connector={'line':{'color':'rgb(63,63,63)'}},
+            title="<b>Local Explanation:</b> Reasoning for this specific record"
+        ))
+        return fig
+
+
+
+        
 
 
 
