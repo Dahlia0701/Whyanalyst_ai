@@ -5,6 +5,9 @@ from src.nlp.parser import Queryparser
 from src.nlp.intent import Intentrouter
 from src.analytics.engine import Analytics
 from src.analytics.plotter import Plotter
+from src.ml.pipeline import MLPipeline
+from src.ml.predictor import Predictor
+from src.ml.explainer import Explainer
 
 # 1. SETUP: Load Data & Initialize "Brain"
 loader=Dataloader("data/data.csv")
@@ -22,7 +25,7 @@ engine = Analytics(metadata)
 plotter = Plotter()
 
 # 2. TEST CASE: A complex grouped query
-user_query = "What is the average sales by Product_type? and plot it."
+user_query = "What are the main factor of influencing sales?"
 print(f"--- Testing Query: '{user_query}' ---")
 
 # 3. EXECUTION FLOW
@@ -70,3 +73,50 @@ if 'visualization' in plan and isinstance(result, pd.DataFrame):
         import plotly.io as pio    
         pio.renderers.default = 'browser'
         fig.show()
+
+#E. IF WANT TO KNOW WHY OR PREDICT ANY DATA 
+if 'prediction' in plan or 'explainable_ai' in plan :
+    print("starting ML...")
+    #checking pipeline
+    pipeline=MLPipeline(metadata)
+    target=input("enter the target column")
+    target_col = target if target else "Sales"
+    Xtrain,Xvalid,ytrain,yvalid,preprocessor=pipeline.prepare_data(df,target_col)
+    print("Step E1: Data Prepared (Pipeline OK)")
+
+    #checking predictor
+    predictor=Predictor(preprocessor)
+    predictor.train(Xtrain,ytrain,Xvalid,yvalid)
+    feature_names,my_model=predictor.get_features()
+    print("Step E2: Model Trained (Predictor OK)")
+
+    #checking explainer
+    explainer=Explainer(my_model,feature_names)
+
+    if parsed['values']:
+        row_df=pd.DataFrame([parsed['values']])
+        for col in Xtrain.columns: #handling missing columns 
+            if col not in row_df.columns:
+                row_df[col]=Xtrain[col].mean() if metadata['columns'][col]['column_type']=='numerical' else Xtrain[col].mode()[0] #categorical
+                #the mode(most_common) return series instaed of one value thats why we used [0]
+                fig=explainer.explain_local(row_df)
+                print("Step E3: Local Explanation Generated")
+
+    else:
+        if any(w in user_query.lower() for w in ['low','hurt','decrease','negative']):
+            query_type='negative'
+        elif any(w in user_query.lower() for w in ['high','boost','increase','positive']):
+            query_type='positive'
+        else:
+            query_type="global" 
+        fig=explainer.explain(Xtrain,query_type=query_type)
+        print(f"Step E3: {query_type.capitalize()} Explanation Generated")
+    
+    if fig:
+        fig.show()
+
+
+
+
+
+

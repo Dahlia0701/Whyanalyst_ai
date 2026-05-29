@@ -14,13 +14,25 @@ class Predictor:
         )
 
     def train(self,Xtrain,ytrain,Xvalid,yvalid):
-        self.my_model=Pipeline(steps=[
-            ('preprocessor',self.preprocessor),
-            ('model',self.model)
-        ])
+        
+        # 1. Manually fit and transform the data so XGBoost can "see" the valid set
+        Xtrain_proc = self.preprocessor.fit_transform(Xtrain)
         Xvalid_proc=self.preprocessor.transform(Xvalid)
+        
+        # 2. Train the model directly (No Pipeline needed here)
+        self.model.fit(
+        Xtrain_proc, 
+        ytrain,
+        eval_set=[(Xvalid_proc, yvalid)],
+        verbose=False)
 
-        self.my_model.fit(Xtrain,ytrain,eval_set=[(Xvalid_proc,yvalid)],verbose=False)
+        # 3. NOW build the Pipeline with the ALREADY FITTED components
+        # This is the secret: the Pipeline will now inherit the fitted state
+        self.my_model = Pipeline(steps=[
+            ('preprocessor', self.preprocessor),
+            ('model', self.model)
+        ])
+
         preprocessors=self.my_model.named_steps['preprocessor']
         self.feature_names=preprocessors.get_feature_names_out()
         print("🚀 XGBoost Model trained successfully!")

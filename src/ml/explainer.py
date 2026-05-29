@@ -33,7 +33,7 @@ class Explainer:
             'importance': importances
         })
         df_imp=df_imp.sort_values('importance',ascending=True).tail(10) # take top 10 most important features 
-        fig=px.bar(df_imp,x='importance',y='feature',orientation='h',
+        fig=px.bar(df_imp,x='importance',y='Features',orientation='h',
                    title="<b>Global insights</b> Factors drivig overall performance",
                    template='plotly_white',color='importance',color_continuous_scale='Viridis')
         return fig
@@ -46,7 +46,6 @@ class Explainer:
         })
         if direction=="negative":
             df_dir = cast(pd.DataFrame,df_dir[df_dir['impact'] < 0].copy()) #cast is used to tell pylance that variable is a dataframe
-            df_dir=df_dir.copy()
             if df_dir.empty:
                 print("⚠️ No negative impacts found in this dataset.")
                 return None
@@ -56,7 +55,6 @@ class Explainer:
                 color="Reds_r" #reversed red dark to light
         else:
             df_dir = cast(pd.DataFrame,df_dir[df_dir['impact'] > 0].copy()) #cast is used to tell pylance that variable is a dataframe
-            df_dir=df_dir.copy()
             if df_dir.empty:
                 print("⚠️ No positive impacts found in this dataset.")
                 return None
@@ -66,6 +64,9 @@ class Explainer:
                 color="Greens" #light to green 
         fig=px.bar(df_dir.heads(10),x='impact',y='feature',orientation='h',title=title,template='plotly_white',
                    color='impact',color_continuous_scale=color)
+        print(f"DEBUG: Chart Data Shape: {df_dir.shape}")
+        print("DEBUG: Attempting to open browser...")
+
         return fig
     
     def explain_local(self,single_row_df):
@@ -77,6 +78,7 @@ class Explainer:
             connector={'line':{'color':'rgb(63,63,63)'}},
             title="<b>Local Explanation:</b> Reasoning for this specific record"
         ))
+
         return fig
 
 

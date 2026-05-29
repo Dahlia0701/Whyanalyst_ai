@@ -17,14 +17,15 @@ class MLPipeline:
 
         Xtrain_full,Xvalid_full,ytrain,yvalid=train_test_split(X,y,train_size=0.8,test_size=0.2,random_state=0)
 
-        categorical_column=[cname for cname in Xtrain_full.columns if Xtrain_full[cname].nunique<10 and Xtrain_full[cname].dtype=='object']
+        categorical_column=[cname for cname in Xtrain_full.columns if Xtrain_full[cname].nunique()<10 and 
+                     not pd.api.types.is_numeric_dtype(Xtrain_full[cname])]
 
         numerical_column=[cname for cname in Xtrain_full.columns if Xtrain_full[cname].dtype in ['int64','float64']]
 
         numerical_transformer=SimpleImputer(strategy='median')
         categorical_transformer=Pipeline(steps=[
             ('imputer',SimpleImputer(strategy='most_frequent')),
-            ('encoder',OneHotEncoder(handle_unknown='ignore',sparse='False'))
+            ('encoder',OneHotEncoder(handle_unknown='ignore',sparse_output=False))
         ])
 
         preprocessor=ColumnTransformer(transformers=[
