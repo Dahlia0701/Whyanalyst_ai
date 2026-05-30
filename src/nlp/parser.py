@@ -9,7 +9,7 @@ class Queryparser:
             "max": ["highest", "max", "top", "maximum"],
             "min": ["lowest", "min", "bottom", "minimum"],
             "plot": ["chart", "graph", "plot", "visualize", "show"],
-            "why": ["why", "reason", "cause", "influence", "factor", "dropped", "increased"],
+            "why": ["why", "reason", "cause", "influence", "factor", "dropped", "increased","what"],
             "predict": ["predict", "forecast", "future", "what if", "expect"]
         }
 
@@ -34,10 +34,11 @@ class Queryparser:
         for col,info in self.metadata['columns'].items(): #for xai
             if info['column_type']=='categorical' and 'unique_values' in info:
                 for val in info['unique_values']:
+                    #print(f"DEBUG: Checking if '{val}' is in query...")
                     if not str(val).strip() or str(val).lower() == 'none': #it was triggering ghost matching 
                         continue
-                    val_pattern = rf"\b{re.escape(str(val).lower())}\b"
-                    if re.search(val_pattern, query):
+                    val_pattern = rf"\b{re.escape(str(val))}\b"
+                    if re.search(val_pattern, query,re.IGNORECASE):
                         found_values[col] = val
                         
                     

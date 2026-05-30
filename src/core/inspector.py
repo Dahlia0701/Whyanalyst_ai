@@ -20,7 +20,7 @@ def describe_data(df:pd.DataFrame):
         
         elif unique_count<(len(df)*0.05) or unique_count<=5: #low cardinality for big dataset and small_set_category for small dataset
             col_type='categorical'
-            extra_info={ 'unique_values': str(val) for val in unique_val[:15] } #unique_values have top 15 unique values from the list of unique values 
+            extra_info={ 'unique_values': [str(val) for val in unique_val[:15]] } #unique_values have top 15 unique values from the list of unique values 
 
         else:
             col_type='identifier/text'

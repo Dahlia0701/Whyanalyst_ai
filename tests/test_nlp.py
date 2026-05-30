@@ -25,7 +25,9 @@ engine = Analytics(metadata)
 plotter = Plotter()
 
 # 2. TEST CASE: A complex grouped query
-user_query = "What are the main factor of influencing sales?"
+#user_query = "Why is the profit high for Electronics in the East?" for local xai
+#user_query= "What are the main drivers of high profit overall?" for positive
+user_query= "What factors are generally hurting the sales"
 print(f"--- Testing Query: '{user_query}' ---")
 
 # 3. EXECUTION FLOW
@@ -97,10 +99,10 @@ if 'prediction' in plan or 'explainable_ai' in plan :
         row_df=pd.DataFrame([parsed['values']])
         for col in Xtrain.columns: #handling missing columns 
             if col not in row_df.columns:
-                row_df[col]=Xtrain[col].mean() if metadata['columns'][col]['column_type']=='numerical' else Xtrain[col].mode()[0] #categorical
+                row_df[col]=Xtrain[col].mean() if metadata['columns'][col]['column_type']=='numeric' else Xtrain[col].mode()[0] #categorical
                 #the mode(most_common) return series instaed of one value thats why we used [0]
-                fig=explainer.explain_local(row_df)
-                print("Step E3: Local Explanation Generated")
+        fig=explainer.explain_local(row_df)
+        print("Step E3: Local Explanation Generated")
 
     else:
         if any(w in user_query.lower() for w in ['low','hurt','decrease','negative']):

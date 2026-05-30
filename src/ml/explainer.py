@@ -62,7 +62,7 @@ class Explainer:
                 df_dir=df_dir.sort_values(by="impact",ascending=False)
                 title="<b>Success factors</b> Top positive Influences"
                 color="Greens" #light to green 
-        fig=px.bar(df_dir.heads(10),x='impact',y='feature',orientation='h',title=title,template='plotly_white',
+        fig=px.bar(df_dir.head(10),x='impact',y='Features',orientation='h',title=title,template='plotly_white',
                    color='impact',color_continuous_scale=color)
         print(f"DEBUG: Chart Data Shape: {df_dir.shape}")
         print("DEBUG: Attempting to open browser...")
@@ -71,13 +71,19 @@ class Explainer:
     
     def explain_local(self,single_row_df):
         shap_values,_=self.get_shap_values(single_row_df)
-        fig=go.Figure(go.Waterfall(
+        fig=go.Figure(go.Waterfall(    #waterfall wrapping it in figure.go.figure creates a full Figure and puts that waterfall trace(chart data) inside it.
             orientation='h',
             x=shap_values[0],
             y=self.features,
             connector={'line':{'color':'rgb(63,63,63)'}},
-            title="<b>Local Explanation:</b> Reasoning for this specific record"
+            
         ))
+        # 3. go.waterfall is an object that plot data points and wrapping it in go.figure creates fig the overall chart with axis ,colors etc
+        #so the title template object lies in update_layout after putting our datapoints (waterfall) inside figure(the overall chart)
+        fig.update_layout(
+        title="Local Explanation: Why this specific record?",
+        template="plotly_white",
+        showlegend=False)
 
         return fig
 

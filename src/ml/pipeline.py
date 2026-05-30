@@ -12,8 +12,10 @@ class MLPipeline:
     def prepare_data(self,df,target_col):
         #This ensures that Product Type becomes Product_Type. If you don't do this, XGBoost might raise a ValueError during the .fit() stage.
         df.columns=[c.replace(' ','_').replace('(','').replace(')','') for c in df.columns] 
+        col_ignore=['Transaction_ID','Date']
+        features=[c for c in df.columns if c not in col_ignore and c!=target_col]
         y=df[target_col]
-        X=df.drop([target_col],axis=1)
+        X=df[features] 
 
         Xtrain_full,Xvalid_full,ytrain,yvalid=train_test_split(X,y,train_size=0.8,test_size=0.2,random_state=0)
 
