@@ -27,7 +27,7 @@ plotter = Plotter()
 # 2. TEST CASE: A complex grouped query
 #user_query = "Why is the profit high for Electronics in the East?" for local xai
 #user_query= "What are the main drivers of high profit overall?" for positive
-user_query= "What factors are generally hurting the sales"
+user_query= "Average sales of electronics  "
 print(f"--- Testing Query: '{user_query}' ---")
 
 # 3. EXECUTION FLOW
@@ -61,7 +61,7 @@ if 'calculate_stats' in plan:
     
     # Final check: Make sure we found at least a target column
     if target:
-        result = engine.calculation(df, target, action, group)
+        result = engine.calculation(df, target, action,group,filter=parsed['values'])
         print(f"Step C (Result Data):\n{result}")
     else:
         print("❌ Error: No numeric column found to perform math on.")

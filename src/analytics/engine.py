@@ -4,7 +4,7 @@ class Analytics:
     def __init__(self,metadata) :
         self.metadata=metadata
 
-    def calculation(self,df,target_col,action,group_by_col=None):
+    def calculation(self,df,target_col,action,group_by_col=None,filter=None):
         col_info=self.metadata['columns'].get(target_col)   #defensive programming 
         if not col_info or col_info['column_type']!='numeric':
             return f"Error: column{target_col} is not a valid column "
@@ -18,6 +18,11 @@ class Analytics:
         op=operations.get(action) #using .get() to handle crashes 
         if not op:
             return f"Error: {action} is not a valid action"
+        
+          # Apply filters like for those queries  average sales of electronics 
+        if filter:
+            for col, val in filter.items():
+                df = df[df[col] == val]
 
         if group_by_col:        #for questions like average sales by region
             if group_by_col not in self.metadata['columns']:
