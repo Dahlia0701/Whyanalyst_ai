@@ -12,11 +12,13 @@ class MLPipeline:
     def prepare_data(self,df,target_col):
         #This ensures that Product Type becomes Product_Type. If you don't do this, XGBoost might raise a ValueError during the .fit() stage.
         df.columns=[c.replace(' ','_').replace('(','').replace(')','') for c in df.columns]
-        df.columns=[col.strip for col in df.columns] #also used for removing extra spaces 
+        df.columns=[col.strip() for col in df.columns] #also used for removing extra spaces 
+
+        target_col = target_col.replace(' ', '_').replace('(', '').replace(')', '').strip() #also cleaing the target column because of 14th line to 
+        #keep everything consistent
 
         #from here to make our model more efficient and accurate we have used some feature engineerring and ensured that theres no cheat
         #sheet available for model
-
         leaky_financial_pairs = {
         "Sales": ["Profit", "num__Profit", "Margin"],
         "Profit": ["Sales", "num__Sales", "Gross_Sales"]}
