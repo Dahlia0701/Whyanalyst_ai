@@ -11,11 +11,34 @@ class MLPipeline:
 
     def prepare_data(self,df,target_col):
         #This ensures that Product Type becomes Product_Type. If you don't do this, XGBoost might raise a ValueError during the .fit() stage.
-        df.columns=[c.replace(' ','_').replace('(','').replace(')','') for c in df.columns] 
-        col_ignore=['Transaction_ID','Date']
-        features=[c for c in df.columns if c not in col_ignore and c!=target_col]
+        df.columns=[c.replace(' ','_').replace('(','').replace(')','') for c in df.columns]
+        df.columns=[col.strip for col in df.columns] #also used for removing extra spaces 
+
+        #from here to make our model more efficient and accurate we have used some feature engineerring and ensured that theres no cheat
+        #sheet available for model
+
+        leaky_financial_pairs = {
+        "Sales": ["Profit", "num__Profit", "Margin"],
+        "Profit": ["Sales", "num__Sales", "Gross_Sales"]}
+
+        columns_to_drop = [target_col]
+
+        for key, bad_cols in leaky_financial_pairs.items():
+            if key.lower() in target_col.lower():
+                for bad_col in bad_cols:
+                    matched_cols = [c for c in df.columns if bad_col.lower() in c.lower()]
+                    columns_to_drop.extend(matched_cols)
+
+        id_keywords = ["id", "transaction_id", "row", "index", "date", "timestamp"]
+        for col in df.columns:
+            if any(kw in col.lower() for kw in id_keywords):
+                columns_to_drop.append(col)
+        
+        columns_to_drop = list(set(columns_to_drop))  # Remove duplicates from our drop list and safely extract features
+        feature_cols = [c for c in df.columns if c not in columns_to_drop]
+            
         y=df[target_col]
-        X=df[features] 
+        X=df[feature_cols] 
 
         Xtrain_full,Xvalid_full,ytrain,yvalid=train_test_split(X,y,train_size=0.8,test_size=0.2,random_state=0)
 
