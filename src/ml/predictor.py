@@ -42,7 +42,7 @@ class Predictor:
         score=mean_absolute_error(preds,yvalid)
         return preds,score 
     
-    def predict(self,Xnew):
+    def predicts(self,Xnew):
         return self.my_model.predict(Xnew)
     
     def get_features(self):

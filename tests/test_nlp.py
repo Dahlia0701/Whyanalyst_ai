@@ -27,7 +27,7 @@ plotter = Plotter()
 # 2. TEST CASE: A complex grouped query
 #user_query = "Why is the profit high for Electronics in the East?" for local xai
 #user_query= "What are the main drivers of high profit overall?" for positive
-user_query= "Average sales of electronics  "
+user_query= "PREDICT"
 print(f"--- Testing Query: '{user_query}' ---")
 
 # 3. EXECUTION FLOW
@@ -91,6 +91,24 @@ if 'prediction' in plan or 'explainable_ai' in plan :
     predictor.train(Xtrain,ytrain,Xvalid,yvalid)
     feature_names,my_model=predictor.get_features()
     print("Step E2: Model Trained (Predictor OK)")
+
+    if'prediction' in plan:
+        preds,score=predictor.predictvalid(Xvalid,yvalid)
+        loader=Dataloader("data/data2.csv")
+        new_df = loader.load_data() # Use that CSV we made earlier
+        if new_df is None:
+            print("Error: file path doesnt exist")
+            import sys 
+            sys.exit()
+        if target_col in new_df.columns: #removing target column
+            Xnew=new_df.drop(columns=[target_col])
+        else:
+            Xnew=new_df.copy()
+        Xnew=Xnew[Xtrain.columns]
+        pre_val=predictor.predicts(Xnew)
+        print("the mae is ",score)
+        print("the prediction value is",pre_val)
+
 
     #checking explainer
     explainer=Explainer(my_model,feature_names)
