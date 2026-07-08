@@ -1,7 +1,7 @@
 # 1. Ignore all virtual environment folders
 venv/
 .venv/
-env/
+.env
 
 # 2. Ignore heavy data files, BUT keep your mock testing data visible
 data/*.csv
