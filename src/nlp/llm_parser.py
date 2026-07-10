@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# 🎯 Bring back your custom Filter block!
 class FilterCondition(BaseModel):
     column: str = Field(description="The exact column name being filtered.")
     operator: Literal["=", ">", "<", ">=", "<=", "!="] = Field(description="The logical comparison operator.")
@@ -18,10 +17,7 @@ class FilterCondition(BaseModel):
 class LLMResponseSchema(BaseModel):
     columns: List[str] = Field(description="List of column names from the dataset mentioned in the query.")
     actions: List[Literal['mean', 'sum', 'max', 'min', 'plot', 'why', 'predict']] = Field(description="Operations needed.")
-    
-    # 🎯 Changed from a Dict to a clean List of our FilterCondition blocks
     filters: List[FilterCondition] = Field(description="List of structural filter conditions extracted from the query.")
-    
     plan: List[Literal['calculate_stats', 'visualization', 'explainable_ai', 'prediction']] = Field(description="The execution steps.")
 
 
@@ -49,7 +45,7 @@ class LLMParser:
         # Generate raw JSON schema mapping from our Pydantic classes
         raw_schema = LLMResponseSchema.model_json_schema()
         
-        # ⚡ THE ULTIMATE SCRUBBER: Recursively sweeps the schema to wipe out all 'additionalProperties'
+        # using recursion to wipe out all 'additionalProperties'
         def strip_additional_properties(schema_dict):
             if isinstance(schema_dict, dict):
                 schema_dict.pop("additionalProperties", None)
@@ -61,7 +57,7 @@ class LLMParser:
 
         strip_additional_properties(raw_schema)
 
-        # Send our fully scrubbed, custom operator-friendly schema to Gemini
+        # Sending request to Gemini
         response = self.client.models.generate_content(
             model="gemini-3.1-flash-lite",
             contents=prompt,
