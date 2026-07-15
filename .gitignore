@@ -18,3 +18,5 @@ __pycache__/
 # 5. Ignore system clutter (Mac/Windows hidden files)
 .DS_Store
 Thumbs.db
+
+storage/
