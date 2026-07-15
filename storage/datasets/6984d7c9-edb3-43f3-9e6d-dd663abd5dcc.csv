@@ -1,0 +1,33 @@
+Transaction_ID,Date,Region,Product_Type,Sales,Quantity,Discount,Profit
+101,2024-01-01,North,Electronics,1200,2,0.1,200
+102,2024-01-02,South,Furniture,800,1,0.05,150
+103,2024-01-03,East,Electronics,1500,3,0.15,300
+104,2024-01-04,West,Office Supplies,200,5,0.0,50
+105,2024-01-05,North,Furniture,950,2,0.1,180
+106,2024-01-06,South,Electronics,1100,2,0.0,220
+107,2024-01-07,East,Office Supplies,150,4,0.05,30
+108,2024-01-08,West,Furniture,1300,3,0.1,250
+109,2024-01-09,North,Office Supplies,300,6,0.0,80
+110,2024-01-10,South,Furniture,700,1,0.2,100
+201,2024-02-01,East,Electronics,1800,4,0.10,350
+202,2024-02-02,West,Furniture,950,2,0.05,170
+301,2024-03-01,South,Electronics,2500,5,0.10,500
+302,2024-03-02,North,Furniture,700,1,0.05,120
+303,2024-03-03,West,Office Supplies,280,6,0.00,60
+304,2024-03-04,East,Electronics,1600,3,0.08,290
+305,2024-03-05,South,Furniture,1350,2,0.15,220
+306,2024-03-06,North,Office Supplies,450,10,0.02,95
+307,2024-03-07,West,Electronics,2100,4,0.12,410
+308,2024-03-08,East,Furniture,980,2,0.10,175
+309,2024-03-09,South,Office Supplies,320,7,0.00,65
+310,2024-03-10,North,Electronics,1900,3,0.05,340
+311,2024-03-11,West,Furniture,1100,2,0.20,160
+312,2024-03-12,East,Office Supplies,230,5,0.03,45
+313,2024-03-13,South,Electronics,2750,6,0.18,530
+314,2024-03-14,North,Furniture,890,1,0.07,140
+315,2024-03-15,West,Office Supplies,370,8,0.01,78
+316,2024-03-16,East,Electronics,1450,2,0.00,250
+317,2024-03-17,South,Furniture,1250,3,0.10,210
+318,2024-03-18,North,Office Supplies,510,9,0.04,100
+319,2024-03-19,West,Electronics,2300,5,0.15,460
+320,2024-03-20,East,Furniture,1050,2,0.06,180
