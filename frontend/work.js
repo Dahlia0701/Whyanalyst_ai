@@ -1,4 +1,4 @@
-// Base API URL - Change this to your production backend URL if deployed
+// Base API URL
 const API_BASE_URL = "http://127.0.0.1:8000";
 
 // DOM Elements
@@ -8,51 +8,66 @@ const sendBtn = document.getElementById("send-btn");
 const chatHistory = document.getElementById("chat-history");
 const statusBadge = document.getElementById("status");
 
-// Session State
+// Session State - Protected from accidental clearing
 let primaryDatasetId = null;
 let predictionDatasetId = null;
 
 // Initialize event listeners
-document.addEventListener("DOMContentLoaded", () => { //waiting until the webpage is completely loaded
+document.addEventListener("DOMContentLoaded", () => {
+    // We listen to changes on the file input, but handle it with strict state validation
     fileUploadInput.addEventListener("change", handleFileUpload);
-    sendBtn.addEventListener("click", handleSendQuery);
-    queryInput.addEventListener("keydown", (e) => { //if user pressed enter button
+    
+    sendBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleSendQuery();
+    });
+
+    queryInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !queryInput.disabled) {
+            e.preventDefault();
+            e.stopPropagation();
             handleSendQuery();
         }
     });
 });
 
-
-//Handles the CSV file uploads. Supports up to 2 files.
- 
+/**
+ * Handles the CSV file uploads safely.
+ */
 async function handleFileUpload(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
     const files = event.target.files;
-    if (files.length === 0) return;
+    
+    // SAFETY: If the event fired but no files were actually selected, 
+    // immediately exit WITHOUT wiping out the existing session state!
+    if (!files || files.length === 0) {
+        return; 
+    }
 
-    // Reset previous states
-    primaryDatasetId = null;
-    predictionDatasetId = null;
+    // A valid upload has started, now we can safely prepare to update the state
+    const filesToUpload = Array.from(files).slice(0, 2);
+    
+    // Visually show progress without breaking old active states until we succeed
     updateStatusBadge("Uploading...", "offline");
-
     addSystemMessage("Uploading and processing your dataset(s)... Please wait.");
 
-    // Limit files to maximum of 2
-    const filesToUpload = Array.from(files).slice(0, 2);
-
     try {
-        // Upload the primary dataset
+        // 1. Upload the primary dataset
         const primaryRes = await uploadFile(filesToUpload[0]);
-        primaryDatasetId = primaryRes.dataset_id;
+        primaryDatasetId = primaryRes.dataset_id; // Set state only after API success
         addSystemMessage(`✅ Primary dataset loaded: <b>${primaryRes.filename}</b> (${primaryRes.row_count} rows).`);
 
-        // If there's a second file, upload it as the prediction dataset
+        // 2. If there's a second file, upload it as the prediction dataset
         if (filesToUpload.length > 1) {
             const predRes = await uploadFile(filesToUpload[1]);
             predictionDatasetId = predRes.dataset_id;
             addSystemMessage(`✅ Prediction dataset loaded: <b>${predRes.filename}</b> (${predRes.row_count} rows).`);
             updateStatusBadge("2 Datasets Active", "online");
         } else {
+            predictionDatasetId = null; // Clear secondary if only one was uploaded this turn
             updateStatusBadge("Dataset Active", "online");
         }
 
@@ -65,13 +80,25 @@ async function handleFileUpload(event) {
     } catch (error) {
         console.error("Upload Error:", error);
         addSystemMessage(`❌ Upload failed: ${error.message}`);
-        updateStatusBadge("Upload Failed", "offline");
-        disableInputs();
+        
+        // Only disable inputs if we don't have a previously working dataset loaded
+        if (!primaryDatasetId) {
+            updateStatusBadge("Upload Failed", "offline");
+            disableInputs();
+        } else {
+            // Keep the previous dataset active if the new upload attempt simply errored out
+            updateStatusBadge(predictionDatasetId ? "2 Datasets Active" : "Dataset Active", "online");
+        }
+    } finally {
+        // Clear the file input's value. 
+        // This allows the user to re-upload the same file later if they want to,
+        // without triggering false "change" events that reset the page.
+        fileUploadInput.value = "";
     }
 }
 
 /**
- * Performs the actual multipart/form-data POST request to FastAPI /upload
+ * Performs the multipart/form-data POST request to FastAPI /upload
  */
 async function uploadFile(file) {
     const formData = new FormData();
@@ -153,7 +180,7 @@ function disableInputs() {
 }
 
 function scrollToBottom() {
-    chatHistory.scrollTop = chatHistory.scrollHeight; //when a new message come automatically scrolls 
+    chatHistory.scrollTop = chatHistory.scrollHeight;
 }
 
 function addUserMessage(message) {
@@ -189,7 +216,7 @@ function removeElement(id) {
 }
 
 /**
- * Parses and displays AI outputs (text, markdown-styled text, and Plotly charts)
+ * Parses and displays AI outputs (text and Plotly charts)
  */
 function renderAIResponse(data) {
     const msgDiv = document.createElement("div");
@@ -198,12 +225,9 @@ function renderAIResponse(data) {
     const contentDiv = document.createElement("div");
     contentDiv.className = "message ai-message";
 
-    // 1. Render text answers (if your backend returns strings)
     if (typeof data === "string") {
         contentDiv.innerHTML = data.replace(/\n/g, "<br>");
     } else if (data && typeof data === "object") {
-        // If your pipeline returns structured JSON, customize this mapping.
-        // Assuming data structure: { explanation: "...", plot: { data: [...], layout: {} } }
         let htmlContent = "";
         if (data.explanation) {
             htmlContent += `<p>${data.explanation.replace(/\n/g, "<br>")}</p>`;
@@ -214,19 +238,17 @@ function renderAIResponse(data) {
         }
         contentDiv.innerHTML = htmlContent;
 
-        // 2. Render Plotly charts dynamically if "plot" or "chart" JSON is present
+        // Render Plotly charts dynamically if "plot" or "chart" data exists
         const chartData = data.plot || data.chart;
         if (chartData && chartData.data && chartData.layout) {
             const chartDiv = document.createElement("div");
-            const chartId = "plotly-chart-" + Date.now(); //creating new unique id 
+            const chartId = "plotly-chart-" + Date.now();
             chartDiv.id = chartId;
             chartDiv.style.width = "100%";
             chartDiv.style.marginTop = "15px";
             contentDiv.appendChild(chartDiv);
 
-            // Wait for html to create chart container i.e div then plotly can safely draw to avoid crashes
             setTimeout(() => {
-                // Ensure Plotly does not break the layout of dark-themed pages
                 const layout = {
                     ...chartData.layout,
                     paper_bgcolor: 'rgba(0,0,0,0)',
@@ -242,10 +264,7 @@ function renderAIResponse(data) {
     chatHistory.appendChild(msgDiv);
     scrollToBottom();
 }
-/*
-for safety ,if user wrote html or js scripts it will be shown as 
-plain text instead of being executed by the browser 
-*/
+
 function escapeHtml(text) {
     return text
         .replace(/&/g, "&amp;")
