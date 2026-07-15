@@ -12,23 +12,27 @@
 
     <div class="chat-container">
         <!-- 1. Header showing active session datasets -->
-        <header class="chat-header">
-            <h2>WhyAnalyst AI</h2>
+        <header class="header">
+            <h3>WhyAnalyst AI</h3>
             <div id="dataset-status" class="dataset-status">
-                <span class="badge offline">No files uploaded</span> 
+                <span id="status" class="badge offline">No files uploaded</span> 
             </div>
         </header>
 
         <!-- 2. Chat history scroll area -->
         <main id="chat-history" class="chat-history">
-            <div class="message bot-message">
-                <p>Hello! Upload your dataset (.csv) to begin analyzing your data.</p>
+            <!-- Centered, borderless elegant welcome message -->
+            <div class="welcome-container">
+                <div class="welcome-message">
+                    <p>Hello! Upload your dataset (.csv) to begin analyzing your data.</p>
+                </div>
             </div>
         </main>
 
         <!-- 3. Fixed control panel at the bottom -->
         <footer class="input-panel">
-            <div class="input-container">
+            <!-- Row 1: Upload (Left) -> Input (Center) -> Send Button (Right) -->
+            <div class="input-row">
                 <!-- File upload button -->
                 <label for="file-upload" class="upload-btn" title="Upload CSV(s)">📎</label>
                 <!-- used 'multiple' user can select 2 files -->
@@ -38,14 +42,16 @@
                 <input type="text" id="query-input" placeholder="Ask a question about your dataset..." disabled />
                 
                 <!-- Submit query button -->
-                <button id="send-btn" disabled>▲</button>
+                <button id="send-btn" class="send-btn" disabled>▲</button>
             </div>
-            <div class="input-footer-text">
-                Upload up to 2 CSV files (Primary Dataset & optional Prediction Dataset)
+            
+            <!-- Row 2: Tip Message Beneath the Controls -->
+            <div class="tip-row">
+                <span class="upload-tip">Upload up to 2 CSV files (Primary Dataset & optional Prediction Dataset)</span>
             </div>
         </footer>
     </div>
 
-    <script src="app.js"></script>
+    <script src="work.js"></script>
 </body>
 </html>

@@ -1,0 +1,293 @@
+/* ==========================================================================
+   1. CUSTOM NATURE-GLOW COLOR VARIABLES
+   ========================================================================== */
+:root {
+    --bg-gradient: radial-gradient(circle at top, #23361a 0%, #151c12 50%, #0d120a 100%);
+    --bg-card: rgba(54, 47, 34, 0.25); /* Semi-transparent Wood Bark */
+    --border-glass: rgba(85, 111, 48, 0.3); /* Subtle Fig Leaf glass border */
+    
+    --text-primary: #EFF4BD;     /* Fresh Grown (Bright Pale Yellow-Green) */
+    --text-secondary: #b0bc98;   /* Soft Sage */
+    --text-muted: #516F7A;       /* Azul Petróleo */
+    
+    --accent-glow: #A2B447;      /* Azeitona (Active Warm Olive) */
+    --accent-dark: #23361A;      /* Moss Green */
+    
+    --font-stack: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ==========================================================================
+   2. GLOBAL BODY STYLING
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-stack);
+    background: var(--bg-gradient);
+    color: var(--text-primary);
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   3. FULL SCREEN GLASS CONTAINER
+   ========================================================================== */
+.chat-container {
+    width: 100vw;
+    height: 100vh;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   4. HEADER STYLING
+   ========================================================================== */
+.header {
+    padding: 25px 40px;
+    border-bottom: 1px solid var(--border-glass);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(13, 18, 10, 0.5);
+}
+
+.header h3 {
+    font-size: 1.6rem;
+    font-weight: 900; /* Extra bold */
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+    text-shadow: 0 0 20px rgba(239, 244, 189, 0.35);
+}
+
+#status {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(81, 111, 122, 0.15); /* Azul Petróleo glow */
+    color: var(--text-secondary);
+    border: 1px solid rgba(81, 111, 122, 0.3);
+}
+
+/* ==========================================================================
+   5. CONVERSATIONAL CHAT AREA
+   ========================================================================== */
+.chat-history {
+    flex: 1;
+    overflow-y: auto;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Custom Scrollbar to match glassmorphism */
+.chat-history::-webkit-scrollbar {
+    width: 6px;
+}
+.chat-history::-webkit-scrollbar-thumb {
+    background: var(--border-glass);
+    border-radius: 10px;
+}
+
+/* Message Bubble Aesthetics */
+.message {
+    padding: 16px 22px;
+    border-radius: 22px;
+    max-width: 80%;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+/* Centering wrapper specifically for the welcome message */
+.welcome-container {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+/* No-box, floating, clean welcome text */
+.welcome-message {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    text-align: center;
+    max-width: 100%;
+}
+
+.welcome-message p {
+    font-size: 2rem; /* Clean bold, larger header style */
+    font-weight: 600;
+    color: var(--text-primary);
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    opacity: 0.95;
+}
+
+/* User Message (Right Aligned, Warm Wood Bark & Olive Outline) */
+.user-message {
+    background: var(--bg-card);
+    border: 1px solid rgba(162, 180, 71, 0.2);
+    color: var(--text-primary);
+    align-self: flex-end;
+    border-bottom-right-radius: 6px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Bot Message (Left Aligned, Clean & Barely Boxed) */
+.bot-message {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+    border-bottom-left-radius: 6px;
+    width: 100%;
+}
+
+/* System Message (Centered Informational Pills) */
+.system-message {
+    align-self: center;
+    background: rgba(85, 111, 48, 0.15); /* Fig Leaf Base */
+    border: 1px solid var(--border-glass);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    padding: 6px 16px;
+    border-radius: 30px;
+}
+
+/* ==========================================================================
+   6. INTERACTIVE PLOTLY BOX
+   ========================================================================== */
+.chart-box {
+    background-color: rgba(13, 18, 10, 0.6) !important;
+    border: 1px solid var(--border-glass);
+    border-radius: 18px;
+    margin-top: 15px;
+    padding: 15px;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+/* ==========================================================================
+   7. FLOATING PILL FOOTER PANEL (ChatGPT Style)
+   ========================================================================== */
+.input-panel {
+    padding: 10px 40px 30px 40px;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers the input elements */
+    gap: 12px;
+}
+
+/* Rounded Pill Container stretched wider like ChatGPT */
+.input-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px; /* Increased from 800px to expand the width */
+    background: rgba(30, 35, 25, 0.6);
+    border: 1px solid var(--border-glass);
+    border-radius: 100px; /* Perfect rounded pill shape */
+    padding: 8px 14px 8px 22px;
+    transition: all 0.3s ease;
+}
+
+.input-row:focus-within {
+    border-color: var(--accent-glow);
+    background: rgba(30, 35, 25, 0.8);
+    box-shadow: 0 0 20px rgba(162, 180, 71, 0.15);
+}
+
+/* Paperclip Label Button */
+.upload-btn {
+    font-size: 1.3rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: transparent;
+    border: none;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.upload-btn:hover {
+    color: var(--accent-glow);
+    transform: scale(1.1);
+}
+
+/* Invisible border input box sitting in the center of the pill */
+#query-input {
+    flex: 1;
+    background: transparent;
+    border: none !important;
+    outline: none !important;
+    color: var(--text-primary);
+    padding: 10px 15px;
+    font-size: 0.95rem;
+    box-shadow: none !important; /* Removes internal shadows */
+}
+
+#query-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+/* Circular Send Icon Button sitting inside the right edge */
+.send-btn {
+    background: var(--accent-glow);
+    color: #141c12; /* Dark forest contrast */
+    border: none;
+    outline: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%; /* Perfect circular button */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.send-btn:hover:not(:disabled) {
+    background: var(--text-primary);
+    box-shadow: 0 4px 12px rgba(162, 180, 71, 0.3);
+    transform: scale(1.05);
+}
+
+.send-btn:disabled {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.2);
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Clean Info Row Sitting Directly Below */
+.tip-row {
+    text-align: center;
+    width: 100%;
+}
+
+.upload-tip {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
