@@ -225,10 +225,28 @@ function renderAIResponse(data) {
     const contentDiv = document.createElement("div");
     contentDiv.className = "message ai-message";
 
-    if (typeof data === "string") {
+    // --- BULLETPROOF TYPE HANDLING ---
+    if (data === null || data === undefined) {
+        contentDiv.innerHTML = "<p>No data returned from analysis.</p>";
+    } 
+    // 1. Handle Numbers (e.g., 14.7)
+    else if (typeof data === "number") {
+        contentDiv.innerHTML = `<p><b>Result:</b> ${data}</p>`;
+    } 
+    // 2. Handle Strings
+    else if (typeof data === "string") {
         contentDiv.innerHTML = data.replace(/\n/g, "<br>");
-    } else if (data && typeof data === "object") {
+    } 
+    // 3. Handle Arrays (e.g., [14.7, 34.7])
+    else if (Array.isArray(data)) {
+        const listItems = data.map(item => `<li>${item}</li>`).join("");
+        contentDiv.innerHTML = `<ul style="margin: 0; padding-left: 20px;">${listItems}</ul>`;
+    } 
+    // 4. Handle Objects (Charts, Tables, Summaries)
+    else if (typeof data === "object") {
         let htmlContent = "";
+        
+        // Render textual summary or explanation
         if (data.explanation) {
             htmlContent += `<p>${data.explanation.replace(/\n/g, "<br>")}</p>`;
         } else if (data.summary) {
@@ -238,11 +256,98 @@ function renderAIResponse(data) {
         }
         contentDiv.innerHTML = htmlContent;
 
-        // Render Plotly charts dynamically if "plot" or "chart" data exists
-        const chartData = data.plot || data.chart;
+        // --- DYNAMIC TABLE RENDERING ---
+        if (data.tables && data.tables.length > 0) {
+            data.tables.forEach(tableObj => {
+                const tableRows = tableObj.data;
+                if (!tableRows || tableRows.length === 0) return;
+
+                const headers = Object.keys(tableRows[0]);
+                const tableContainer = document.createElement("div");
+                tableContainer.className = "table-container";
+                tableContainer.style.overflowX = "auto";
+                tableContainer.style.marginTop = "15px";
+                tableContainer.style.borderRadius = "8px";
+
+                let tableHtml = `<table class="analysis-table" style="width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 14px; color: #e2e8f0; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">`;
+                
+                tableHtml += `<thead><tr style="background: rgba(255, 255, 255, 0.1); text-align: left; border-bottom: 2px solid rgba(255, 255, 255, 0.15);">`;
+                headers.forEach(header => {
+                    const displayHeader = header.replace(/_/g, " ").toUpperCase();
+                    tableHtml += `<th style="padding: 10px 12px; font-weight: 600;">${displayHeader}</th>`;
+                });
+                tableHtml += `</tr></thead>`;
+
+                tableHtml += `<tbody>`;
+                tableRows.forEach((row, index) => {
+                    const rowBg = index % 2 === 0 ? "rgba(255, 255, 255, 0.02)" : "rgba(255, 255, 255, 0.05)";
+                    tableHtml += `<tr style="background: ${rowBg}; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">`;
+                    headers.forEach(header => {
+                        let value = row[header];
+                        if (typeof value === "number" && !Number.isInteger(value)) {
+                            value = value.toFixed(2);
+                        }
+                        tableHtml += `<td style="padding: 10px 12px;">${value !== null ? value : "-"}</td>`;
+                    });
+                    tableHtml += `</tr>`;
+                });
+                tableHtml += `</tbody></table>`;
+
+                tableContainer.innerHTML = tableHtml;
+                contentDiv.appendChild(tableContainer);
+            });
+        }
+
+        // --- NEW: ANALYTICAL PLOTLY CHARTS RENDERING ---
+        if (data.charts && data.charts.length > 0) {
+            data.charts.forEach(chartObj => {
+                let chartData = chartObj.plotly_json;
+
+                // Handle double serialization
+                if (typeof chartData === "string") {
+                    try {
+                        chartData = JSON.parse(chartData);
+                    } catch (e) {
+                        console.error("Failed to parse plotly_json string inside charts array:", e);
+                        chartData = null;
+                    }
+                }
+
+                if (chartData && chartData.data && chartData.layout) {
+                    const chartDiv = document.createElement("div");
+                    const chartId = "plotly-chart-anal-" + Date.now() + Math.random().toString(36).substr(2, 5);
+                    chartDiv.id = chartId;
+                    chartDiv.style.width = "100%";
+                    chartDiv.style.marginTop = "15px";
+                    contentDiv.appendChild(chartDiv);
+
+                    setTimeout(() => {
+                        const layout = {
+                            ...chartData.layout,
+                            paper_bgcolor: 'rgba(0,0,0,0)',
+                            plot_bgcolor: 'rgba(0,0,0,0)',
+                            font: { color: '#e2e8f0', ...chartData.layout?.font }
+                        };
+                        Plotly.newPlot(chartId, chartData.data, layout, { responsive: true });
+                    }, 50);
+                }
+            });
+        }
+
+        // --- EXPLANATION CHART RENDERING (ML/SHAP) ---
+        let chartData = data.explanation_chart;
+        if (typeof chartData === "string") {
+            try {
+                chartData = JSON.parse(chartData);
+            } catch (e) {
+                console.error("Failed to parse explanation_chart string:", e);
+                chartData = null;
+            }
+        }
+
         if (chartData && chartData.data && chartData.layout) {
             const chartDiv = document.createElement("div");
-            const chartId = "plotly-chart-" + Date.now();
+            const chartId = "plotly-chart-ml-" + Date.now();
             chartDiv.id = chartId;
             chartDiv.style.width = "100%";
             chartDiv.style.marginTop = "15px";

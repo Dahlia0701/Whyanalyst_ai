@@ -25,7 +25,7 @@ engine = Analytics(metadata)
 plotter = Plotter()
 
 # 2. TEST CASE: Complex conditional phrase
-user_query = "Why is the profit high for Electronics in the East?"
+user_query = "show me the total profit by porduct category and visualize it"
 print(f"\n---  Testing Query: '{user_query}' ---")
 
 # 3. EXECUTION FLOW

@@ -74,19 +74,35 @@ def run_analysis_pipeline(df: pd.DataFrame, metadata: dict, user_query: str, new
                 
                 if isinstance(result, pd.DataFrame):
                     # Format DataFrame rows into a list of row dicts for frontend rendering
+                    reset_result=result.reset_index()
                     response_data["tables"].append({
                         "action": action,
-                        "data": result.reset_index().to_dict(orient="records")
+                        "data": reset_result.to_dict(orient="records")
                     })
                     
                     # Convert interactive plots directly to native JSON layout formats
                     if 'visualization' in plan:
-                        fig = plotter.create_chart(result, target, group, action)
+                        fig = plotter.create_chart(reset_result, target, group, action)
                         if fig:
                             response_data["charts"].append({
                                 "action": action,
                                 "plotly_json": pio.to_json(fig)
                             })
+                #single numeric value 
+                elif isinstance(result, (int, float)) or pd.api.types.is_number(result):
+    
+                    response_data["tables"].append({
+                        "action": action,
+                        "data": [{"Metric": f"{action.title()} of {target}", "Value": round(float(result), 2)}]
+                    })
+                    
+                # Series (Fallback if grouping structure results in a pandas Series)
+                elif isinstance(result, pd.Series):
+                    df_series = result.to_frame()
+                    response_data["tables"].append({
+                        "action": action,
+                        "data": df_series.reset_index().to_dict(orient="records")
+                    })
         else:
             response_data["summary"] += "\n[Error: No numeric column found to perform mathematical statistics on.]"
 
