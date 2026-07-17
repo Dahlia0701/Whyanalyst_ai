@@ -314,6 +314,13 @@ function renderAIResponse(data) {
                 }
 
                 if (chartData && chartData.data && chartData.layout) {
+                    
+                    /*console.log("========== BAR CHART =========="); for checking and debugging 
+                    console.log(chartData);
+                    console.log("Trace 0:", chartData.data[0]);
+                    console.log("Y values:", chartData.data[0].y);
+                    console.log("Plotly Version:", Plotly.version);*/
+
                     const chartDiv = document.createElement("div");
                     const chartId = "plotly-chart-anal-" + Date.now() + Math.random().toString(36).substr(2, 5);
                     chartDiv.id = chartId;
@@ -346,6 +353,12 @@ function renderAIResponse(data) {
         }
 
         if (chartData && chartData.data && chartData.layout) {
+
+            /*console.log("========== WATERFALL =========="); for checking and debugging
+            console.log(chartData);
+            console.log("Trace 0:", chartData.data[0]);
+            console.log("Y values:", chartData.data[0].y);*/
+
             const chartDiv = document.createElement("div");
             const chartId = "plotly-chart-ml-" + Date.now();
             chartDiv.id = chartId;

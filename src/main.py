@@ -86,7 +86,7 @@ def run_analysis_pipeline(df: pd.DataFrame, metadata: dict, user_query: str, new
                         if fig:
                             response_data["charts"].append({
                                 "action": action,
-                                "plotly_json": pio.to_json(fig)
+                                "plotly_json": pio.to_json(fig) #this line compresses a numeric array to bdata (feature of Plotly 6.0+)
                             })
                 #single numeric value 
                 elif isinstance(result, (int, float)) or pd.api.types.is_number(result):
@@ -168,6 +168,6 @@ def run_analysis_pipeline(df: pd.DataFrame, metadata: dict, user_query: str, new
                 fig = explainer.explain(Xtrain, query_type=query_type)
             
             if fig:
-                response_data["explanation_chart"] = pio.to_json(fig)
+                response_data["explanation_chart"] = pio.to_json(fig) #this line compresses a numeric array to bdata (feature of Plotly 6.0+)
                 
     return response_data
