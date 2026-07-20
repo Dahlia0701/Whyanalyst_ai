@@ -104,7 +104,7 @@ body {
 .message {
     padding: 16px 22px;
     border-radius: 22px;
-    max-width: 80%;
+    max-width: 100%;
     line-height: 1.6;
     font-size: 0.95rem;
     transition: all 0.3s ease;
@@ -146,16 +146,20 @@ body {
     align-self: flex-end;
     border-bottom-right-radius: 6px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    justify-content: flex-end;
 }
 
 /* Bot Message (Left Aligned, Clean & Barely Boxed) */
 .bot-message {
-    align-self: flex-start;
+    align-self: center;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.04);
     color: var(--text-secondary);
-    border-bottom-left-radius: 6px;
+    border-radius: 22px; /* Smooth out the corners evenly if it's centered */
     width: 100%;
+    max-width: 1000px;
+    /*border-bottom-left-radius: 6px;
+    width: 100%;*/
 }
 
 /* System Message (Centered Informational Pills) */
