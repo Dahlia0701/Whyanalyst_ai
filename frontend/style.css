@@ -295,3 +295,144 @@ body {
     color: var(--text-secondary);
     opacity: 0.7;
 }
+/* ==========================================
+   PREDICTION & TABLE RENDERING STYLES
+   ========================================== */
+
+/* Utility Lists */
+.response-list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+/* Predictions Card Container */
+.predictions-container {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mae-score-badge {
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #4ade80;
+}
+
+.mae-score-badge .mae-value {
+    color: #ffffff;
+}
+
+.prediction-message {
+    font-size: 13px;
+    color: #cbd5e1;
+    margin-bottom: 8px;
+}
+
+.prediction-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+/* Scrollable Prediction Table */
+.prediction-table-wrapper {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+}
+
+.prediction-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+}
+
+.prediction-table thead tr {
+    background: rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+}
+
+.prediction-table th {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+}
+
+.prediction-table td {
+    padding: 6px 12px;
+}
+
+.prediction-table tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.prediction-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.prediction-table tbody tr:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.prediction-table .row-index {
+    color: #94a3b8;
+}
+
+.prediction-table .pred-val {
+    color: #38bdf8;
+    font-weight: 500;
+}
+
+/* Dynamic Analysis Tables */
+.table-container {
+    overflow-x: auto;
+    margin-top: 15px;
+    border-radius: 8px;
+}
+
+.analysis-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #e2e8f0;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.analysis-table thead tr {
+    background: rgba(255, 255, 255, 0.1);
+    text-align: left;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.analysis-table th {
+    padding: 10px 12px;
+    font-weight: 600;
+}
+
+.analysis-table td {
+    padding: 10px 12px;
+}
+
+.analysis-table tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.analysis-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.analysis-table tbody tr:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Plotly Chart Container */
+.plotly-chart-container {
+    width: 100%;
+    margin-top: 15px;
+}

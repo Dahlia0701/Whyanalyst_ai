@@ -25,7 +25,8 @@ engine = Analytics(metadata)
 plotter = Plotter()
 
 # 2. TEST CASE: Complex conditional phrase
-user_query = "show me the total profit by porduct category and visualize it"
+#user_query = "Why is the profit high for Electronics in the East?"
+user_query= "predict sales of data3.csv"
 print(f"\n---  Testing Query: '{user_query}' ---")
 
 # 3. EXECUTION FLOW
@@ -108,10 +109,10 @@ if 'prediction' in plan or 'explainable_ai' in plan:
 
     if 'prediction' in plan:
         preds, score = predictor.predictvalid(Xvalid, yvalid)
-        loader2 = Dataloader("data/data2.csv")
+        loader2 = Dataloader("data/data3.csv")
         new_df = loader2.load_data() 
         if new_df is None:
-            print("Error: data2.csv path doesn't exist")
+            print("Error: data3.csv path doesn't exist")
             sys.exit()
             
         if target_col in new_df.columns:
@@ -124,28 +125,25 @@ if 'prediction' in plan or 'explainable_ai' in plan:
         print("The MAE score is:", score)
         print("The predicted value array is:", pre_val)
 
-    explainer = Explainer(my_model, feature_names)
-
-    #  For single-point ML explanations, collapse filters into a single row dictionary mapping
-    legacy_values_dict = {f['column']: f['value'] for f in parsed.get('filters', [])}
-
-    if legacy_values_dict:
-        row_df = pd.DataFrame([legacy_values_dict])
-        for col in Xtrain.columns: 
-            if col not in row_df.columns:
-                row_df[col] = Xtrain[col].mean() if metadata['columns'][col]['column_type'] == 'numeric' else Xtrain[col].mode()[0]
-        fig = explainer.explain_local(row_df)
-        print("Step E3: Local Explanation Generated")
-
-    else:
-        if any(w in user_query.lower() for w in ['low', 'hurt', 'decrease', 'negative']):
-            query_type = 'negative'
-        elif any(w in user_query.lower() for w in ['high', 'boost', 'increase', 'positive']):
-            query_type = 'positive'
+    if 'explainable_ai' in plan:
+        explainer = Explainer(my_model, feature_names)
+        #  For single-point ML explanations, collapse filters into a single row dictionary mapping
+        legacy_values_dict = {f['column']: f['value'] for f in parsed.get('filters', [])}
+        if legacy_values_dict:
+            row_df = pd.DataFrame([legacy_values_dict])
+            for col in Xtrain.columns: 
+                if col not in row_df.columns:
+                    row_df[col] = Xtrain[col].mean() if metadata['columns'][col]['column_type'] == 'numeric' else Xtrain[col].mode()[0]
+            fig = explainer.explain_local(row_df)
+            print("Step E3: Local Explanation Generated")
         else:
-            query_type = "global" 
-        fig = explainer.explain(Xtrain, query_type=query_type)
-        print(f"Step E3: {query_type.capitalize()} Explanation Generated")
-    
-    if fig:
-        fig.show()
+            if any(w in user_query.lower() for w in ['low', 'hurt', 'decrease', 'negative']):
+                query_type = 'negative'
+            elif any(w in user_query.lower() for w in ['high', 'boost', 'increase', 'positive']):
+                query_type = 'positive'
+            else:
+                query_type = "global" 
+            fig = explainer.explain(Xtrain, query_type=query_type)
+            print(f"Step E3: {query_type.capitalize()} Explanation Generated")
+        if fig:
+            fig.show()

@@ -139,8 +139,8 @@ def run_analysis_pipeline(df: pd.DataFrame, metadata: dict, user_query: str, new
                 pre_val = predictor.predicts(Xnew)
                 
                 response_data["predictions"] = {
-                    "mae_score": score,
-                    "predicted_values": list(pre_val)
+                    "mae_score": float(score),
+                    "predicted_values": [float(val) for val in pre_val]
                 }
 
         if 'explainable_ai' in plan:
