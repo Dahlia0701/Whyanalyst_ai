@@ -22,7 +22,8 @@ def run_analysis_pipeline(df: pd.DataFrame, metadata: dict, user_query: str, new
         "tables": [],
         "charts": [],
         "predictions": None,
-        "explanation_chart": None
+        "explanation_chart": None,
+        "explanation_text": None
     }
     
     # Initialize unified LLMParser and core tools
@@ -169,5 +170,5 @@ def run_analysis_pipeline(df: pd.DataFrame, metadata: dict, user_query: str, new
             
             if fig:
                 response_data["explanation_chart"] = pio.to_json(fig) #this line compresses a numeric array to bdata (feature of Plotly 6.0+)
-                
+                response_data["explanation_text"]=explainer.generate_narrative(fig)
     return response_data

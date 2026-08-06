@@ -1,9 +1,12 @@
+import os
+import json
 import shap
 import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from typing import cast
+from typing import cast,Optional
+from google import genai
 
 class Explainer:
     def __init__(self,my_model,feature_names):
@@ -12,10 +15,58 @@ class Explainer:
         self.features=feature_names
         self.explainer=shap.TreeExplainer(self.model)
 
+        api_key=os.getenv("GEMINI_API_KEY")
+        self.client=genai.Client(api_key=api_key) if api_key else None
+
     def get_shap_values(self,Xraw):   #Xraw is same Xtrain of pipeline.py
         X_proc=self.preprocessor.transform(Xraw)
         shap_values=self.explainer.shap_values(X_proc)
         return shap_values,X_proc
+
+    def generate_narrative(self, fig) -> str:
+        """
+        Extracts numerical trace data directly from the Plotly figure
+        and uses Gemini to generate a plain-language business summary.
+        """
+        if not self.client or not fig or not hasattr(fig, 'data') or len(fig.data) == 0:
+            return ""
+
+        try:
+            # Extract feature names (y) and SHAP impact values (x) from Plotly trace
+            trace = fig.data[0]
+            feature_names = list(trace.y) if hasattr(trace, 'y') and trace.y is not None else []
+            shap_values = list(trace.x) if hasattr(trace, 'x') and trace.x is not None else []
+
+            # Pair features with their SHAP impact values
+            contributions = [
+                {"feature": str(f), "impact": float(v)} 
+                for f, v in zip(feature_names, shap_values)
+            ]
+
+            prompt = f"""
+            You are the explainability engine for whyanalyst.ai.
+            Analyze these SHAP feature impact values for an executive dashboard summary:
+
+            Feature Contributions:
+            {json.dumps(contributions, indent=2)}
+
+            Instructions:
+            - Provide a concise 2-3 sentence executive narrative explaining what factors drove the outcome up or pulled it down.
+            - Write in clear business language suitable for non-technical stakeholders.
+            - Do NOT include raw SHAP scores, technical jargon (like 'waterfall', 'base value', 'log-odds'), or markdown bold formatting.
+            - Keep the output as clean plain text.
+            """
+
+            response = self.client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+
+            return response.text.strip() if response.text else ""
+
+        except Exception as e:
+            print(f"⚠️ SHAP Narrative Generation Error: {e}")
+            return ""
     
     def explain(self,Xraw,query_type="global"):
         shap_values,X_proc=self.get_shap_values(Xraw)
