@@ -1,6 +1,8 @@
 from xgboost import XGBRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import mean_absolute_error
+import re 
+import pandas as pd 
 
 class Predictor:
     def __init__(self,preprocessor):
@@ -12,6 +14,21 @@ class Predictor:
             n_jobs=-1,
             random_state=0
         )
+
+    def _clean_feature_name(self, name: str, cat_cols: list) -> str:
+        """Dynamically formats one-hot categorical splits and numeric labels."""
+        # 1. Strip remaining transformer prefixes if present
+        clean_name = re.sub(r'^[a-zA-Z0-9_\-]+__', '', name)
+        # 2. Match against original categorical column names to insert standard colon delimiters
+        for cat in cat_cols:
+            if clean_name.startswith(f"{cat}_"):
+                category_val = clean_name[len(cat) + 1:]
+                col_title = cat.replace("_", " ")
+                return f"{col_title}: {category_val}"
+        # 3. Format numeric features (convert underscores back to space titles)
+        return clean_name.replace("_", " ")
+
+    
 
     def train(self,Xtrain,ytrain,Xvalid,yvalid):
         
@@ -34,7 +51,17 @@ class Predictor:
         ])
 
         preprocessors=self.my_model.named_steps['preprocessor']
-        self.feature_names=preprocessors.get_feature_names_out()
+        raw_names=preprocessors.get_feature_names_out()
+
+        # Retrieve original categorical list dynamically from ColumnTransformer
+        cat_cols = []
+        for name, trans, cols in preprocessors.transformers_:
+            if name == 'cat':
+                cat_cols = list(cols) if isinstance(cols, (list, pd.Index)) else cols.tolist()
+
+        # Clean all names before storing
+        self.feature_names = [self._clean_feature_name(col, cat_cols) for col in raw_names]
+
         print("🚀 XGBoost Model trained successfully!")
 
     def predictvalid(self,Xvalid,yvalid):

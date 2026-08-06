@@ -58,7 +58,9 @@ class MLPipeline:
         preprocessor=ColumnTransformer(transformers=[
             ('num',numerical_transformer,numerical_column),
             ('cat',categorical_transformer,categorical_column)
-        ])
+        ],
+        verbose_feature_names_out=False
+        )
 
         my_col=categorical_column+numerical_column
         Xtrain=Xtrain_full[my_col].copy()
