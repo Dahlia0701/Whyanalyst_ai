@@ -391,6 +391,16 @@ function renderAIResponse(data) {
                 };
                 Plotly.newPlot(chartId, chartData.data, layout, { responsive: true });
             }, 50);
+            // ✅ NEW: Narrative box directly beneath the SHAP chart
+            if (data.explanation_text) {
+                const narrativeBox = document.createElement("div");
+                narrativeBox.className = "message bot-message chart-narrative-box";
+                narrativeBox.innerHTML = `
+                    <div class="chart-narrative-label">💡 What this chart means</div>
+                    <p>${escapeHtml(data.explanation_text).replace(/\n/g, "<br>")}</p>
+                `;
+                contentDiv.appendChild(narrativeBox);
+            }
         }
     }
 

@@ -7,6 +7,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 from typing import cast,Optional
 from google import genai
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Explainer:
     def __init__(self,my_model,feature_names):
@@ -25,23 +28,41 @@ class Explainer:
 
     def generate_narrative(self, fig) -> str:
         """
-        Extracts numerical trace data directly from the Plotly figure
+        Extracts numerical trace data directly from the Plotly figure (Bar or Waterfall)
         and uses Gemini to generate a plain-language business summary.
         """
-        if not self.client or not fig or not hasattr(fig, 'data') or len(fig.data) == 0:
+        
+        if not self.client:
+            print("⚠️ SHAP Narrative Error: Gemini client is None (check GEMINI_API_KEY).")
+            return ""
+
+        if not fig or not hasattr(fig, 'data') or len(fig.data) == 0:
+            print("⚠️ SHAP Narrative Error: Empty figure passed.")
             return ""
 
         try:
-            # Extract feature names (y) and SHAP impact values (x) from Plotly trace
             trace = fig.data[0]
-            feature_names = list(trace.y) if hasattr(trace, 'y') and trace.y is not None else []
-            shap_values = list(trace.x) if hasattr(trace, 'x') and trace.x is not None else []
+            
+            # Robust extraction of x and y from any Plotly trace type
+            raw_y = list(trace.y) if hasattr(trace, 'y') and trace.y is not None else []
+            raw_x = list(trace.x) if hasattr(trace, 'x') and trace.x is not None else []
 
-            # Pair features with their SHAP impact values
-            contributions = [
-                {"feature": str(f), "impact": float(v)} 
-                for f, v in zip(feature_names, shap_values)
-            ]
+            feature_names = list(raw_y) if raw_y is not None else []
+            shap_values = list(raw_x) if raw_x is not None else []
+
+            # Match features and values safely
+            contributions = []
+            for f, v in zip(raw_y, raw_x):
+                if f is not None and v is not None:
+                    try:
+                        contributions.append({"feature": str(f), "impact": float(v)})
+                    except (ValueError, TypeError):
+                        continue
+
+            if not contributions:
+                print("⚠️ SHAP Narrative Warning: No valid contribution pairs extracted from figure.")
+                return ""
+
 
             prompt = f"""
             You are the explainability engine for whyanalyst.ai.
@@ -58,7 +79,7 @@ class Explainer:
             """
 
             response = self.client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-3.1-flash-lite",
                 contents=prompt
             )
 

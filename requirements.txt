@@ -17,3 +17,5 @@ plotly>=5.19.0
 # Interface 
 
 dotenv
+
+google-genai>=1.47.0

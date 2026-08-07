@@ -436,3 +436,18 @@ body {
     width: 100%;
     margin-top: 15px;
 }
+/* SHAP Chart Narrative Box */
+.chart-narrative-box {
+    margin-top: 12px;
+    background: rgba(162, 180, 71, 0.08);  
+    border-color: var(--border-glass);
+    max-width: 100%;
+    width: 100%;
+}
+
+.chart-narrative-label {
+    font-weight: 600;
+    color: var(--accent-glow);
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+}
