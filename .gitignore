@@ -12,9 +12,6 @@ data/*.xlsx
 __pycache__/
 *.pyc
 
-# 4. Ignore local Streamlit configuration files
-.streamlit/
-
 # 5. Ignore system clutter (Mac/Windows hidden files)
 .DS_Store
 Thumbs.db
