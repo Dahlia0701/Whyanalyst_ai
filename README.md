@@ -193,10 +193,10 @@ whyanalyst_ai/
 ├── storage/
 │   └── datasets/        # auto-created at runtime; holds user-uploaded CSVs
 ├── tests/
-│   ├── test_core.py
+│   ├── test_llmt.py
 │   ├── test_llm.py
 │   ├── test_ml.py
-│   └── test_nlp.py
+│   └── test_reg.py
 ├── .env
 ├── .gitignore
 └── requirements.txt
