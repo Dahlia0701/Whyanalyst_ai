@@ -29,6 +29,15 @@ A full-stack, natural language Explainable AI (XAI) and data analytics platform.
 
 ---
 
+## 📺 Demo
+
+Check out the **Whyanalyst_AI** in action:
+
+<div align="center">
+  <video src=https://github.com/user-attachments/assets/5bed3396-aace-415e-a909-0a6f7c09ebb1 width="100%" controls>
+</video>
+</div>
+
 ## 🧠 How It Works (Pipeline)
 
 ```
