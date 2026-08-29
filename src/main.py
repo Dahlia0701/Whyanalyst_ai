@@ -143,7 +143,6 @@ def run_analysis_pipeline(df: pd.DataFrame, metadata: dict, user_query: str, new
                     "mae_score": float(score),
                     "predicted_values": [float(val) for val in pre_val]
                 }
-
         if 'explainable_ai' in plan:
             explainer = Explainer(my_model, feature_names)
 
@@ -159,6 +158,8 @@ def run_analysis_pipeline(df: pd.DataFrame, metadata: dict, user_query: str, new
                         else:
                             row_df[col] = Xtrain[col].mean()
                 fig = explainer.explain_local(row_df)
+                shap_values, _ = explainer.get_shap_values(row_df)
+                contributions = explainer.get_local_contributions(shap_values)
             else:
                 if any(w in user_query.lower() for w in ['low', 'hurt', 'decrease', 'negative']):
                     query_type = 'negative'
@@ -166,9 +167,10 @@ def run_analysis_pipeline(df: pd.DataFrame, metadata: dict, user_query: str, new
                     query_type = 'positive'
                 else:
                     query_type = "global" 
-                fig = explainer.explain(Xtrain, query_type=query_type)
+                fig, contributions = explainer.explain(Xtrain, query_type=query_type)
             
             if fig:
                 response_data["explanation_chart"] = pio.to_json(fig) #this line compresses a numeric array to bdata (feature of Plotly 6.0+)
-                response_data["explanation_text"]=explainer.generate_narrative(fig)
+                response_data["explanation_text"]=explainer.generate_narrative(contributions)
+
     return response_data
