@@ -29,9 +29,15 @@ class Explainer:
     def get_contributions(self, shap_values, direction="global", top_n=10):
         """Single source of truth for feature/impact pairs — used by both the chart and the narrative."""
         if direction == "global":
-            importances = np.abs(shap_values).mean(axis=0)
-            df = pd.DataFrame({'feature': self.features, 'impact': importances})
+            abs_importance = np.abs(shap_values).mean(axis=0)
+            signed_avg = shap_values.mean(axis=0)
+            df = pd.DataFrame({
+                'feature': self.features,
+                'impact': abs_importance,
+                'typical_effect': np.where(signed_avg > 0, 'increases profit', 'decreases profit')
+            })
             df = df.sort_values('impact', ascending=False).head(top_n)
+            
         else:
             avg_imp = shap_values.mean(axis=0)
             df = pd.DataFrame({'feature': self.features, 'impact': avg_imp})
@@ -47,7 +53,7 @@ class Explainer:
         df = df.sort_values('abs_impact', ascending=False).head(top_n).drop(columns='abs_impact')
         return df.to_dict('records')
 
-    def generate_narrative(self, contributions: list[dict]) -> str:
+    def generate_narrative(self, contributions: list[dict],record_context: Optional[dict]=None) -> str:
         """
         takes feature/impact pairs directly and uses Gemini to
         generate a plain-language business summary. 
@@ -61,11 +67,20 @@ class Explainer:
             return ""
 
         try:
+            context_line = ""
+            if record_context:
+                context_line = (
+                    f"\nThe actual category values for this record are {json.dumps(record_context)}. "
+                    f"Note: Sales, Quantity, and Discount were not specified by the user, so they were filled with "
+                    f"dataset averages — mention this explicitly if they appear as major factors, since they reflect "
+                    f"a typical value rather than something specific to this query.\n"
+                )
             prompt = f"""
             You are the explainability engine for whyanalyst.ai.
             Analyze these SHAP feature impact values for an executive dashboard summary:
 
             Feature Contributions:{json.dumps(contributions, indent=2)}
+            {context_line}
             Instructions:
             - Provide a concise 2-3 sentence executive narrative explaining what factors drove the outcome up or pulled it down.
             - Write in clear business language suitable for non-technical stakeholders.
