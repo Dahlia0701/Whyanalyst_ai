@@ -11,18 +11,17 @@ class MLPipeline:
         self.metadata=metadata
 
     def prepare_data(self,df,target_col):
-        df=df.copy()
+        df=df.copy() #prevents modifying the original input dataframe outside the function
         #This ensures that Product Type becomes Product_Type. If you don't do this, XGBoost might raise a ValueError during the .fit() stage.
         df.columns=[c.replace(' ','_').replace('(','').replace(')','') for c in df.columns]
         df.columns=[col.strip() for col in df.columns] #also used for removing extra spaces 
 
-        target_col = target_col.replace(' ', '_').replace('(', '').replace(')', '').strip() #also cleaing the target column because of 14th line to 
-        #keep everything consistent
+        target_col = target_col.replace(' ', '_').replace('(', '').replace(')', '').strip() #also cleaing the target column to keep everything consistent 
 
-
+        
         id_keywords = ["id", "transaction_id", "row", "index", "date", "timestamp"]
         def is_id_like(col):
-                tokens=re.split(r'[_\W]+',col.lower())
+                tokens=re.split(r'[_\W]+',col.lower()) #split around underscore or non-word character.
                 return any(kw in tokens for kw in id_keywords)
         columns_to_drop=[c for c in df.columns if is_id_like(c)]
         
@@ -32,7 +31,7 @@ class MLPipeline:
         y=df[target_col]
         X=df[feature_cols] 
 
-        #dropping columns that are nearly corremlated with the target(leakage) 
+        #dropping columns that are nearly correlated with the target(leakage) 
         leaky_cols=[]
         for col in X.select_dtypes(include='number').columns:
              corr=X[col].corr(y)
