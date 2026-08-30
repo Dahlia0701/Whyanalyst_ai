@@ -10,6 +10,7 @@ class Predictor:
         self.model=XGBRegressor(
             n_estimators=1000,
             learning_rate=0.05,
+            eval_metric="mae",
             early_stopping_rounds=5,
             n_jobs=-1,
             random_state=0

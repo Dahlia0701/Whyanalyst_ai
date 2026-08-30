@@ -26,51 +26,61 @@ class Explainer:
         shap_values=self.explainer.shap_values(X_proc)
         return shap_values,X_proc
 
-    def generate_narrative(self, fig) -> str:
+    def get_contributions(self, shap_values, direction="global", top_n=10):
+        """Single source of truth for feature/impact pairs — used by both the chart and the narrative."""
+        if direction == "global":
+            abs_importance = np.abs(shap_values).mean(axis=0)
+            signed_avg = shap_values.mean(axis=0)
+            df = pd.DataFrame({
+                'feature': self.features,
+                'impact': abs_importance,
+                'typical_effect': np.where(signed_avg > 0, 'increases profit', 'decreases profit')
+            })
+            df = df.sort_values('impact', ascending=False).head(top_n)
+            
+        else:
+            avg_imp = shap_values.mean(axis=0)
+            df = pd.DataFrame({'feature': self.features, 'impact': avg_imp})
+            df = df[df['impact'] > 0] if direction == "positive" else df[df['impact'] < 0]
+            df = df.sort_values('impact', ascending=(direction == "negative")).head(top_n)
+        return df.to_dict('records')
+
+    def get_local_contributions(self, shap_values, top_n=10):
+        """Signed feature contributions for a single row — keeps direction, unlike global aggregation."""
+        row = shap_values[0]
+        df = pd.DataFrame({'feature': self.features, 'impact': row})
+        df['abs_impact'] = df['impact'].abs()
+        df = df.sort_values('abs_impact', ascending=False).head(top_n).drop(columns='abs_impact')
+        return df.to_dict('records')
+
+    def generate_narrative(self, contributions: list[dict],record_context: Optional[dict]=None) -> str:
         """
-        Extracts numerical trace data directly from the Plotly figure (Bar or Waterfall)
-        and uses Gemini to generate a plain-language business summary.
+        takes feature/impact pairs directly and uses Gemini to
+        generate a plain-language business summary. 
         """
-        
         if not self.client:
-            print("⚠️ SHAP Narrative Error: Gemini client is None (check GEMINI_API_KEY).")
+            print("SHAP Narrative Error : Gemini client is none (check GEMINI_API_KEY) ")
             return ""
 
-        if not fig or not hasattr(fig, 'data') or len(fig.data) == 0:
-            print("⚠️ SHAP Narrative Error: Empty figure passed.")
+        if not contributions:
+            print("Shap Narrative Warning: No contributuons passed.")
             return ""
 
         try:
-            trace = fig.data[0]
-            
-            # Robust extraction of x and y from any Plotly trace type
-            raw_y = list(trace.y) if hasattr(trace, 'y') and trace.y is not None else []
-            raw_x = list(trace.x) if hasattr(trace, 'x') and trace.x is not None else []
-
-            feature_names = list(raw_y) if raw_y is not None else []
-            shap_values = list(raw_x) if raw_x is not None else []
-
-            # Match features and values safely
-            contributions = []
-            for f, v in zip(raw_y, raw_x):
-                if f is not None and v is not None:
-                    try:
-                        contributions.append({"feature": str(f), "impact": float(v)})
-                    except (ValueError, TypeError):
-                        continue
-
-            if not contributions:
-                print("⚠️ SHAP Narrative Warning: No valid contribution pairs extracted from figure.")
-                return ""
-
-
+            context_line = ""
+            if record_context:
+                context_line = (
+                    f"\nThe actual category values for this record are {json.dumps(record_context)}. "
+                    f"Note: Sales, Quantity, and Discount were not specified by the user, so they were filled with "
+                    f"dataset averages — mention this explicitly if they appear as major factors, since they reflect "
+                    f"a typical value rather than something specific to this query.\n"
+                )
             prompt = f"""
             You are the explainability engine for whyanalyst.ai.
             Analyze these SHAP feature impact values for an executive dashboard summary:
 
-            Feature Contributions:
-            {json.dumps(contributions, indent=2)}
-
+            Feature Contributions:{json.dumps(contributions, indent=2)}
+            {context_line}
             Instructions:
             - Provide a concise 2-3 sentence executive narrative explaining what factors drove the outcome up or pulled it down.
             - Write in clear business language suitable for non-technical stakeholders.
@@ -87,35 +97,31 @@ class Explainer:
 
         except Exception as e:
             print(f"⚠️ SHAP Narrative Generation Error: {e}")
-            return ""
+            return "AI narrative is temporarily unavailable."
     
     def explain(self,Xraw,query_type="global"):
         shap_values,X_proc=self.get_shap_values(Xraw)
+        contributions = self.get_contributions(shap_values, direction=query_type)
         if query_type=='global':
-            return self.plot_global(shap_values)
+            fig = self.plot_global(shap_values)
         elif query_type=='negative':
-            return self.plot_directional(shap_values,direction='negative')
+            fig = self.plot_directional(shap_values,direction='negative')
         elif query_type=='positive':
-            return self.plot_directional(shap_values,direction='positive')
+            fig = self.plot_directional(shap_values,direction='positive')
+        return fig, contributions
         
     def plot_global(self,shap_values):
-        importances=np.abs(shap_values).mean(axis=0) #SHAP internally works heavily with NumPy
-        df_imp=pd.DataFrame ({
-            'Features': self.features,
-            'importance': importances
-        })
-        df_imp=df_imp.sort_values('importance',ascending=True).tail(10) # take top 10 most important features 
+        contributions = self.get_contributions(shap_values, direction="global")
+        df_imp = pd.DataFrame(contributions).rename(columns={'feature': 'Features', 'impact': 'importance'})
+        df_imp = df_imp.sort_values('importance', ascending=True)
         fig=px.bar(df_imp,x='importance',y='Features',orientation='h',
                    title="<b>Global insights</b> Factors drivig overall performance",
                    template='plotly_white',color='importance',color_continuous_scale='Viridis')
         return fig
     
     def plot_directional(self,shap_values,direction="positive"):
-        avg_imp=shap_values.mean(axis=0)
-        df_dir=pd.DataFrame({
-            'Features': self.features,
-            'impact':avg_imp
-        })
+        contributions = self.get_contributions(shap_values, direction=direction)
+        df_dir = pd.DataFrame(contributions).rename(columns={'feature': 'Features'})
         if direction=="negative":
             df_dir = cast(pd.DataFrame,df_dir[df_dir['impact'] < 0].copy()) #cast is used to tell pylance that variable is a dataframe
             if df_dir.empty:
