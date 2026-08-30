@@ -18,7 +18,7 @@ class Predictor:
     def _clean_feature_name(self, name: str, cat_cols: list) -> str:
         """Dynamically formats one-hot categorical splits and numeric labels."""
         # 1. Strip remaining transformer prefixes if present
-        clean_name = re.sub(r'^[a-zA-Z0-9_\-]+__', '', name)
+        clean_name = re.sub(r'^[a-zA-Z0-9_\-]+__', '', name) 
         # 2. Match against original categorical column names to insert standard colon delimiters
         for cat in cat_cols:
             if clean_name.startswith(f"{cat}_"):
@@ -27,8 +27,6 @@ class Predictor:
                 return f"{col_title}: {category_val}"
         # 3. Format numeric features (convert underscores back to space titles)
         return clean_name.replace("_", " ")
-
-    
 
     def train(self,Xtrain,ytrain,Xvalid,yvalid):
         
@@ -40,7 +38,7 @@ class Predictor:
         self.model.fit(
         Xtrain_proc, 
         ytrain,
-        eval_set=[(Xvalid_proc, yvalid)],
+        eval_set=[(Xvalid_proc, yvalid)], 
         verbose=False)
 
         # 3. NOW build the Pipeline with the ALREADY FITTED components
